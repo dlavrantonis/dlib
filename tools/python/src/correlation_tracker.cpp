@@ -31,6 +31,8 @@ void start_track(
         throw dlib::error("Unsupported image type, must be 8bit gray or RGB image.");
     }
 }
+void set_filter_size( correlation_tracker &tracker,unsigned long filter_size)
+{tracker.set_filter_size(filter_size);}
 
 void start_track_rec(
     correlation_tracker &tracker,
@@ -148,6 +150,7 @@ void bind_correlation_tracker(py::module &m)
                 Danelljan, Martin, et al. 'Accurate scale estimation for robust visual \n\
                 tracking.' Proceedings of the British Machine Vision Conference BMVC. 2014.")
             .def(py::init())
+            .def("set_filter_size",&::set_filter_size,py::arg("filter_size"),"sets the filter size of the tracker")
             .def("start_track", &::start_track, py::arg("image"), py::arg("bounding_box"), "\
             requires \n\
                 - image is a numpy ndarray containing either an 8bit grayscale or RGB image. \n\

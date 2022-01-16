@@ -18,7 +18,7 @@ namespace dlib
     class correlation_tracker
     {
     public:
-        explicit correlation_tracker(unsigned long filter_size = 3,
+        explicit correlation_tracker(unsigned long filter_size = 4,
                                      unsigned long num_scale_levels = 5,
                                      unsigned long scale_window_size = 23,
                                      double regularizer_space = 0.001,
@@ -34,7 +34,7 @@ namespace dlib
         {
             // Create the cosine mask used for space filtering.
             mask = make_cosine_mask();
-
+            //printf("filter size:%lu",filter_size);
             // Create the cosine mask used for the scale filtering.
             scale_cos_mask.resize(get_num_scale_levels());
             const long max_level = get_num_scale_levels() / 2;
@@ -46,11 +46,19 @@ namespace dlib
             }
         }
 
+        void set_filter_size(unsigned long filter_size)
+        {
+          this->filter_size=filter_size;
+         //printf("sfs filter size:%lu",filter_size);
+        }
+
         template <typename image_type>
         void start_track(
             const image_type &img,
             const drectangle &p)
         {
+
+            //printf("st filter size:%lu",filter_size);
             DLIB_CASSERT(p.is_empty() == false,
                          "\t void correlation_tracker::start_track()"
                              << "\n\t You can't give an empty rectangle.");
