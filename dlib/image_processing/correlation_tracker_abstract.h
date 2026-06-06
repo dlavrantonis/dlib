@@ -25,7 +25,7 @@ namespace dlib
 
     public:
 
-        explicit correlation_tracker (unsigned long filter_size = 6, 
+        explicit correlation_tracker (unsigned long filter_size = 3, 
             unsigned long num_scale_levels = 5, 
             unsigned long scale_window_size = 23,
             double regularizer_space = 0.001,
@@ -41,7 +41,7 @@ namespace dlib
                 - Initializes correlation_tracker. Higher value of filter_size and 
                   num_scale_levels increases tracking precision but requires more CPU 
                   for processing. Recommended values for filter_size = 5-7, 
-                  default = 6, for num_scale_levels = 4-6, default = 5
+                  default = 3, for num_scale_levels = 4-6, default = 5
                 - #get_position().is_empty() == true
         !*/
 

@@ -33,6 +33,14 @@ void start_track (
     }
 }
 
+void set_filter_size(
+    correlation_tracker& tracker,
+    unsigned long filter_size
+)
+{
+    tracker.set_filter_size(filter_size);
+}
+
 void start_track_rec (
     correlation_tracker& tracker,
     py::array img,
@@ -92,6 +100,55 @@ double update_guess_rec (
     return update_guess(tracker, img, dbounding_box);
 }
 
+double update_noscale (
+    correlation_tracker& tracker,
+    py::array img
+)
+{
+    if (is_image<unsigned char>(img))
+    {
+        return tracker.update_noscale(numpy_image<unsigned char>(img));
+    }
+    else if (is_image<rgb_pixel>(img))
+    {
+        return tracker.update_noscale(numpy_image<rgb_pixel>(img));
+    }
+    else
+    {
+        throw dlib::error("Unsupported image type, must be 8bit gray or RGB image.");
+    }
+}
+
+double update_noscale_guess (
+    correlation_tracker& tracker,
+    py::array img,
+    const drectangle& bounding_box
+)
+{
+    if (is_image<unsigned char>(img))
+    {
+        return tracker.update_noscale(numpy_image<unsigned char>(img), bounding_box);
+    }
+    else if (is_image<rgb_pixel>(img))
+    {
+        return tracker.update_noscale(numpy_image<rgb_pixel>(img), bounding_box);
+    }
+    else
+    {
+        throw dlib::error("Unsupported image type, must be 8bit gray or RGB image.");
+    }
+}
+
+double update_noscale_guess_rec (
+    correlation_tracker& tracker,
+    py::array img,
+    const rectangle& bounding_box
+)
+{
+    drectangle dbounding_box(bounding_box);
+    return update_noscale_guess(tracker, img, dbounding_box);
+}
+
 drectangle get_position (const correlation_tracker& tracker) { return tracker.get_position(); }
 
 // ----------------------------------------------------------------------------------------
@@ -107,6 +164,8 @@ void bind_correlation_tracker(py::module &m)
                 Danelljan, Martin, et al. 'Accurate scale estimation for robust visual \n\
                 tracking.' Proceedings of the British Machine Vision Conference BMVC. 2014.")
         .def(py::init())
+        .def("set_filter_size", &::set_filter_size, py::arg("filter_size"),
+            "sets the filter size of the tracker")
         .def("start_track", &::start_track, py::arg("image"), py::arg("bounding_box"), "\
             requires \n\
                 - image is a numpy ndarray containing either an 8bit grayscale or RGB image. \n\
@@ -162,6 +221,27 @@ void bind_correlation_tracker(py::module &m)
                 - Returns the peak to side-lobe ratio.  This is a number that measures how \n\
                   confident the tracker is that the object is inside #get_position(). \n\
                   Larger values indicate higher confidence.")
+        .def("update_noscale", &::update_noscale, py::arg("image"), "\
+            requires \n\
+                - image is a numpy ndarray containing either an 8bit grayscale or RGB image. \n\
+                - get_position().is_empty() == false \n\
+                  (i.e. you must have started tracking by calling start_track()) \n\
+            ensures \n\
+                - performs: return update_noscale(img, get_position())")
+        .def("update_noscale", &::update_noscale_guess, py::arg("image"), py::arg("guess"), "\
+            requires \n\
+                - image is a numpy ndarray containing either an 8bit grayscale or RGB image. \n\
+                - get_position().is_empty() == false \n\
+                  (i.e. you must have started tracking by calling start_track()) \n\
+            ensures \n\
+                - performs: return update_noscale(img, guess)")
+        .def("update_noscale", &::update_noscale_guess_rec, py::arg("image"), py::arg("guess"), "\
+            requires \n\
+                - image is a numpy ndarray containing either an 8bit grayscale or RGB image. \n\
+                - get_position().is_empty() == false \n\
+                  (i.e. you must have started tracking by calling start_track()) \n\
+            ensures \n\
+                - performs: return update_noscale(img, guess)")
         .def("get_position", &::get_position, "returns the predicted position of the object under track.");
     }
 }
